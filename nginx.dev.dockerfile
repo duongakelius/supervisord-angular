@@ -25,7 +25,7 @@ COPY ./config/start.sh .
 RUN ["chmod", "+x", "./start.sh"]
 EXPOSE 8080
 
-USER $USER
+# USER $USER
 CMD ["./start.sh", "run start..."]
 
 # docker build -t nginx-angular -f nginx.dev.dockerfile .
