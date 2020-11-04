@@ -1,13 +1,3 @@
-##### Stage 1
-# FROM node:latest as node
-# LABEL author="Dan Wahlin"
-# WORKDIR /app
-# COPY package.json package-lock.json ./
-# RUN npm install
-# COPY . .
-# RUN npm run build -- --prod
-
-##### Stage 2
 FROM nginx:alpine
 # define where is cache file in nginx (optional)
 VOLUME /var/cache/nginx
@@ -16,11 +6,10 @@ COPY /dist /usr/share/nginx/html
 COPY ./config/nginx.conf /etc/nginx/conf.d/default.conf
 
 
-# WORKDIR /opt/app
-
 # Install tools
 RUN apk update \
-    && apk add supervisor jq && apk add bash
+    && apk add supervisor jq \
+    && apk add bash
 
 ADD ./config/supervisor.d/default.ini /etc/supervisor.d/
 
@@ -36,11 +25,11 @@ COPY ./config/start.sh .
 RUN ["chmod", "+x", "./start.sh"]
 EXPOSE 8080
 
-# USER $USER
+USER $USER
 CMD ["./start.sh", "run start..."]
 
-# docker build -t nginx-angular -f nginx.prod.dockerfile .
+# docker build -t nginx-angular -f nginx.dev.dockerfile .
 # docker run -p 8080:80 nginx-angular
 
 # run bash to switch /user
-# docker run it -p 8080:80 nginx-angular /bin/bash
+# docker run -it nginx-angular /bin/bash

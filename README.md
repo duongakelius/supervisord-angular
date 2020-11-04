@@ -1,71 +1,35 @@
-# Angular Core Concepts
+1. install npm & node
+2. run `npm instali`
+3. run `ng build --prod` to build angular app in`dist` folder
+4. build docker image:
+   `docker build -t nginx-angular -f nginx.dev.dockerfile .`
+5. run docker as root
+   `docker run -p 8080:80 nginx-angular`
+6. test supervisord works (with root) by visit `localhost:8080`
 
-This project shows several core features of Angular including:
+### Run with non root user - "appuser"
 
-* Components
-* Data Binding
-* Communication between components
-* Services
-* Routing
+7. use user `appuser` (uid = 1001) by uncommenting `line 28`
+   in `nginx.dev.dockerfile`
+8. build docker image again:
+   `docker build -t nginx-angular -f nginx.dev.dockerfile .`
+9. run docker as appuser
+   `docker run -p 8080:80 nginx-angular`
+   I got the same error when running in new cluster:
+   `Error: Cannot open an HTTP server: socket.error reported errno.EACCES (13)`
 
-## Running the Project Locally
+# Another approach
 
-1. Install the Angular CLI
+1. go to step 4
+2. run docker as root in foreground mode
+   `docker run -it nginx-angular /bin/bash`
+3. run `./start.sh` to start supervisord
+4. test supervisord works (with root) by visit `localhost:8080`
 
-    `npm install -g @angular/cli`
+### Run with non root user - "appuser"
 
-1. Run `npm install` at the root of this project
-
-1. Run `ng serve -o`
-
-
-## Running the Project Using Docker Containers
-
-1. Install the Angular CLI
-
-    `npm install -g @angular/cli`
-
-1. Run `npm install` at the root of this project
-
-1. Build the project
-
-    `ng build`
-
-1. Ensure that you have volumes (file sharing) enabled in the Docker Desktop settings.
-
-1. Note that this build puts the build files directly in the `dist` folder. If your `angular.json` file in your own custom project puts them in a subfolder such as `dist/your-project-folder` then you'll need to update the `docker-compose.yml` file. In that case you'd change:
-
-    ```yaml
-    volumes:
-      - ./dist:/usr/share/nginx/html
-    ```
-
-    To:
-
-    ```yaml
-    volumes:
-      - ./dist/your-project-folder:/usr/share/nginx/html
-    ```
-
-
-1. Run `docker-compose build`
-
-1. Run `docker-compose up`
-
-1. Visit `http://localhost`
-
-## Running the `Production` Version in Containers
-
-1. Run `docker-compose -f docker-compose.prod.yml [build | up]`. This uses a multi-stage Docker build process to create the nginx image for the Angular app.
-
-    **Note**: This project build puts the Angular build files directly in the `dist` folder. If your `angular.json` file in your own custom project puts them in a subfolder such as `dist/your-project-folder` then you'll need to update `nginx.prod.dockerfile` with the appropriate path. You'd need to update this instruction:
-
-    ```dockerfile
-    COPY --from=node /app/dist /usr/share/nginx/html
-    ```
-
-    To:
-
-    ```dockerfile
-    COPY --from=node /app/dist/your-project-folder /usr/share/nginx/html
-    ```
+5. switch to `appuser`
+   `su - appuser`
+6. run `./start.sh` to start supervisord
+7. after granting `appuser` the rights to access supervisord, i got the same error when running in new cluster:
+   `Error: Cannot open an HTTP server: socket.error reported errno.EACCES (13)`
